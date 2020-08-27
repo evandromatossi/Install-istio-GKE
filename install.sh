@@ -27,6 +27,12 @@ kubectl create clusterrolebinding cluster-admin-binding \
     --user=$(gcloud config get-value core/account)
 
 ###install istio
+curl -L https://istio.io/downloadIstio | sh -
+
+cd istio-1.7.0
+
+export PATH=$PWD/bin:$PATH
+
 
 istioctl install --set profile=default
 
@@ -34,7 +40,12 @@ kubectl label namespace default istio-injection=enabled
 
 istioctl analyze
 
-###install prometheus
+## install jaeger opcional
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.7/samples/addons/jaeger.yaml
+
+istioctl dashboard jaeger
+
+###install prometheus opcional
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.7/samples/addons/prometheus.yaml
 
 istioctl dashboard prometheus
@@ -47,3 +58,5 @@ istioctl dashboard grafana
 ###Install Kiali
 
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.7/samples/addons/kiali.yaml
+
+istioctl dashboard kiali
