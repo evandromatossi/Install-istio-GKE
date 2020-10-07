@@ -42,7 +42,6 @@ istioctl install --set profile=default \
 --set components.egressGateways[0].enabled=true \
 --set components.egressGateways[0].name=istio-egressgateway
 
-
 kubectl label namespace default istio-injection=enabled
 
 istioctl analyze
@@ -67,3 +66,70 @@ istioctl dashboard grafana
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.7/samples/addons/kiali.yaml
 
 istioctl dashboard kiali
+
+
+### Configuracao dos gateway 
+
+### Opcional Egress gateway for HTTP traffic
+###link https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/
+
+kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: name-host
+spec:
+  hosts:
+  - edition.cnn.com
+  ports:
+  - number: 80
+    name: http-port
+    protocol: HTTP
+  - number: 443
+    name: https
+    protocol: HTTPS
+  resolution: DNS
+EOF
+
+### Ingress gateway 
+### Opcional ingress gateway 
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: name-gateway
+  namespace: xxxxxx
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - xxxxxxx
+    port:
+      name: https-443
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+---
+###Ingress interno 
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: name-gateway
+  namespace: xxxxxxxx
+spec:
+  selector:
+    istio: ilbgateway
+  servers:
+  - hosts:
+    - xxxxxx
+    port:
+      name: https-443
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      privateKey: /etc/istio/ilbgateway-certs/tls.key
+      serverCertificate: /etc/istio/ilbgateway-certs/tls.crt
