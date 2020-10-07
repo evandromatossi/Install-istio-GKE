@@ -33,8 +33,15 @@ cd istio-1.7.0
 
 export PATH=$PWD/bin:$PATH
 
-
+##### Install without egress
 istioctl install --set profile=default
+
+##### Install with egress
+
+istioctl install --set profile=default \
+--set components.egressGateways[0].enabled=true \
+--set components.egressGateways[0].name=istio-egressgateway
+
 
 kubectl label namespace default istio-injection=enabled
 
